@@ -4,6 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Veeam Kasten Hands-on Lab - OpenShift Virtualization",
   description: "Veeam Kasten Hands-on Lab - OpenShift Virtualization",
+  base: "/kasten-ocpv-lab/",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
