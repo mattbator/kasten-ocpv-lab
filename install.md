@@ -1,4 +1,4 @@
-# Markdown Extension Examples
+# Installing Veeam Kasten <Badge type="tip" text="v6.5.13" />
 
 This page demonstrates some of the built-in markdown extensions provided by VitePress.
 
