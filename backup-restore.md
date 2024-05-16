@@ -45,7 +45,9 @@ In this exercise...
       k10.kasten.io/sc-supports-block-mode-exports=true
     ```
 
-1. do i need to do anything for API access?
+    > [!NOTE]
+    >
+    > Ceph RBD native API integration...
 
 ## 4. Creating a Kasten Policy
 

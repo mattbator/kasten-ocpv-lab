@@ -5,7 +5,7 @@ export default defineConfig({
   title: "Veeam Kasten Lab Guide - OpenShift Virtualization Roadshow",
   description: "Add-on lab exercises for enterprise-ready Kubernetes data protection",
   base: "/kasten-ocpv-lab/",
-  head: [['link', { rel: 'icon', href: 'https://raw.githubusercontent.com/mattbator/kasten-ocpv-lab/main/favicon.ico' }]],
+  head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
   cleanUrls: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
