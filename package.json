@@ -3,11 +3,12 @@
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview",
-    "predeploy" : "npm run docs:build",
-    "deploy" : "gh-pages -d .vitepress/dist"
+    "predeploy": "npm run docs:build",
+    "deploy": "gh-pages -d .vitepress/dist"
   },
   "devDependencies": {
-    "gh-pages": "^6.1.1"
+    "gh-pages": "^6.1.1",
+    "medium-zoom": "^1.1.0"
   },
   "homepage": "https://mattbator.github.io/kasten-ocpv-lab/"
 }

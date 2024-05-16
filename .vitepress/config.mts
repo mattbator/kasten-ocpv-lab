@@ -5,7 +5,7 @@ export default defineConfig({
   title: "Veeam Kasten Lab Guide - OpenShift Virtualization Roadshow",
   description: "Add-on lab exercises for enterprise-ready Kubernetes data protection",
   base: "/kasten-ocpv-lab/",
-  head: [['link', { rel: 'icon', href: '/kasten-ocpv-lab/favicon.ico' }]],
+  head: [['link', { rel: 'icon', href: 'https://raw.githubusercontent.com/mattbator/kasten-ocpv-lab/main/favicon.ico' }]],
   cleanUrls: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
@@ -29,7 +29,7 @@ export default defineConfig({
       {
         text: 'Lab Guide',
         items: [
-          { text: 'Installing Kasten', link: '/install' },
+          { text: 'Installing Veeam Kasten', link: '/install' },
           { text: 'Creating Location Profiles', link: '/location-profile' },
           { text: 'Enabling K10DR', link: '/k10dr' },
           { text: 'Protecting Virtual Machines', link: '/backup-restore' }
