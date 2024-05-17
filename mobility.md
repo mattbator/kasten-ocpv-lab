@@ -31,11 +31,15 @@ In this exercise...
     | ***Restore After Import*** | Click to enable |
     | ***Import Frequency*** | Select ***On-Demand*** |
     | ***Config Data for Import*** | Paste the migration token |
-    | ***Profile for Import*** | Select `ceph-rgw-immutable` |
+    | ***Profile for Import*** | Select `global-profile-example` |
 
     ![](static/mobility/3.png)
 
     ![](static/mobility/3b.png)
+
+    > [!CRITICAL]
+    >
+    > Why you need to select `global-profile-example`...
 
 1. Click ***Create Policy***.
 
@@ -43,11 +47,17 @@ In this exercise...
 
     ![](static/mobility/4.png)
 
-2. Return to ***Dashboard*** in the sidebar and select the `kasten-lab-import` Policy Run under ***Actions*** to monitor status.
+1. Return to ***Dashboard*** in the sidebar and select the `kasten-lab-import` Policy Run under ***Actions*** to monitor status.
 
     ![](static/mobility/5.png)
 
     Once the Import completes, you should observe the Restore action start immediately, using the most recent `kasten-lab` RestorePoint.
+
+1. Once the restore completes, open ***OpenShift Console → Virtualization → Virtual Machines*** on `cluster-2`.
+   
+    ![](static/mobility/6.png)
+   
+    You should observe the `fedora-k10` VM from `cluster-1` running in the `kasten-lab` namespace (in addition to the `fedora-k10` VM cloned in a previous lab exercise).
 
 ## 3. Advanced Options
 
