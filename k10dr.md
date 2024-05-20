@@ -1,7 +1,12 @@
 # Enabling K10 DR
 
 ## 1. Introduction
-In this exercise...
+
+***Kasten Disaster Recovery*** (aka K10 DR) aims to protect ***Kasten*** from the underlying infrastructure failures. In particular, this feature provides the ability to recover a Kasten install in case of a variety of disasters such as the accidental deletion of Kasten, failure of underlying storage that Kasten uses for its catalog, or even the accidental destruction of the Kubernetes cluster on which Kasten is deployed.
+
+Unlike OADP and Velero which use a single, known key for encrypting all backup data, each Kasten backup is encrypted using unique encryption keys both per-policy and per-application to safeguard data against unauthorized access. As the Kasten catalog contains the primary encryption key used to these unique encryption keys for your backup data, the K10 DR policy must use a separate passphrase for encryption (as it can't encrypt itself).
+
+*In this exercise you will enable the K10 DR feature.*
 
 ## 2. Enabling K10 DR
 
@@ -21,7 +26,7 @@ In this exercise...
 
     > [!IMPORTANT]
     >
-    > Keep it secret, keep it safe - because... 
+    > It's critical that the passphrase used to encrypt K10 DR backups be stored in a safe and secure location, as it is required to restore a K10 DR backup.
 
     > [!NOTE]
     >

@@ -2,13 +2,15 @@
 
 ## 1. Introduction
 
-In this exercise...
+*In this exercise you will restore an OpenShift Virtual Machine to an alternate cluster from a Kasten backup.*
 
 > [!IMPORTANT]
 >
 > This exercise should be completed by the `cluster-1` user ***ONLY***.
 
 ## 2. Creating an Import Policy
+
+Unlike the "Snapshot" policy created in a previous exercise, an "Import" policy is used to import Kasten RestorePoints to a different cluster.
 
 1. In the ***Kasten Dashboard***, select `cluster-1` from the multi-cluster dropdown menu and select ***Policies → Policies*** from the sidebar.
 
@@ -39,21 +41,21 @@ In this exercise...
 
     > [!CRITICAL]
     >
-    > Why you need to select `global-profile-example`...
+    > Ensure `global-profile-example` is selected, not `ceph-rgw-immutable` - this is because `global-profile-example` points to the backup repository on `cluster-1`, whereas the `ceph-rgw-immutable` profile on `cluster-2` points to its own, local Ceph bucket.
 
-1. Click ***Create Policy***.
+2. Click ***Create Policy***.
 
-1. Under the new `kasten-lab-import` Policy, click ***Run Once → Yes*** to initiate importing `kasten-lab` RestorePoints.
+3. Under the new `kasten-lab-import` Policy, click ***Run Once → Yes*** to initiate importing `kasten-lab` RestorePoints.
 
     ![](static/mobility/4.png)
 
-1. Return to ***Dashboard*** in the sidebar and select the `kasten-lab-import` Policy Run under ***Actions*** to monitor status.
+4. Return to ***Dashboard*** in the sidebar and select the `kasten-lab-import` Policy Run under ***Actions*** to monitor status.
 
     ![](static/mobility/5.png)
 
     Once the Import completes, you should observe the Restore action start immediately, using the most recent `kasten-lab` RestorePoint.
 
-1. Once the restore completes, open ***OpenShift Console → Virtualization → Virtual Machines*** on `cluster-2`.
+5. Once the restore completes, open ***OpenShift Console → Virtualization → Virtual Machines*** on `cluster-2`.
    
     ![](static/mobility/6.png)
    
@@ -75,6 +77,6 @@ Check out the video below to see an example of creating and applying transforms 
 
 ## 4. Takeaways
 
-- Stuff
-- and
-- Things
+- Kasten backups can be restored to different clusters using Import policies
+- Import policies can automate restore from the latest backup for use in DR or test/dev environments
+- Transforms can be used to alter manifest specifications to aide in moving workloads between different clusters, storage, or clouds

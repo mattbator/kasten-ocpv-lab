@@ -2,7 +2,23 @@
 
 ## 1. Introduction
 
-In this exercise...
+This add-on lab guide is intended to familiarize practitioners with the protection of OpenShift Virtualization workloads using ***Veeam Kasten for Kubernetes***. It assumes the learner has completed other ***OpenShift Virtualization Roadshow*** lab exercises and are familiar with virtual machine provisioning and management in OpenShift.
+
+### What is Veeam Kasten?
+
+***Veeam Kasten for Kubernetes*** is a purpose-built data protection solution for Kubernetes that enables organizations to perform backup & restore, disaster recovery, and cross-cluster mobility of their applications.
+
+### How does Kasten work?
+
+![](static/install/00.png)
+
+1. Kasten is deployed to the cluster that it protects. Within the cluster, Kasten communicates with the Kubernetes API server to discover applications and their resources.
+2. Kasten orchestrates point-in-time snapshots of complete applications, including both application manifest data and storage volume data.
+3. Kasten exports portable copies of the point-in-time snapshot to an external object, NFS, or Veeam repository.
+
+---
+
+*In the first exercise you will install Veeam Kasten through the OpenShift OperatorHub and access the dashboard user interface via an OpenShift Route.*
 
 ## 2. Running Primer Script
 
@@ -10,7 +26,7 @@ In this exercise...
 
     ![](static/install/01.png)
 
-1. In the ***Web Terminal***, run the following to...:
+1. In the ***Web Terminal***, run the following to run the Kasten "primer" script to evaluate your target cluster configuration prior to Kasten installation:
 
     ```bash
     helm repo add kasten https://charts.kasten.io/
@@ -28,6 +44,8 @@ In this exercise...
     ...
     ```
 
+    The `k10.kasten.io/is-snapshot-class` annotation is used by Kasten to determine which VolumeSnapshotClass should be used by Kasten to request CSI snapshots for PersistentVolumes provisioned by a given CSI provider.
+
 1. Run the following to annotate the available VolumeSnapshotClasses and re-run the primer script:
 
     ```bash
@@ -42,7 +60,7 @@ In this exercise...
     curl -s https://docs.kasten.io/tools/k10_primer.sh  | bash
     ```
 
-    The primer should now complete without errors.
+    The primer should now complete without errors, indicating any common configuration issues have been addressed.
 
     > [!NOTE]
     >
@@ -60,7 +78,9 @@ In this exercise...
 
     > [!NOTE]
     >
-    > Alternate versions of the Kasten operator are available for use if transacting Kasten licensing through the Red Hat Marketplace. 
+    > Alternate versions of the Kasten operator are available for use if transacting Kasten licensing through the Red Hat Marketplace.
+    >
+    > If desired, Kasten may also be [installed on OpenShift via Helm chart](https://docs.kasten.io/latest/install/openshift/helm.html#helm-based-installation). 
 
 1. Click ***Install***.
 
@@ -84,7 +104,7 @@ In this exercise...
 
     > [!NOTE]
     >
-    > YAML view, Helm options...
+    > The Kasten installation can be further customized using the YAML view. A complete list of configuration parameters is [available on docs.kasten.io](https://docs.kasten.io/latest/install/advanced.html#complete-list-of-k10-helm-options). 
 
 1. Click ***Create***.
 
@@ -104,7 +124,11 @@ In this exercise...
     oc whoami -t
     ```
 
-1. Close the ***Web Terminal***.
+    > [!NOTE]
+    >
+    > This token will be used to authenticate to Kasten as your current OpenShift user. In addition to Kubernetes bearer tokens, Kasten also supports authentication using OpenID Connect (OIDC), Active Directory (LDAP), and OpenShift's built-in OAuth server. 
+
+2. Close the ***Web Terminal***.
 
 ## 4. Accessing the Kasten Dashboard
 
@@ -126,4 +150,4 @@ In this exercise...
 
     > [!NOTE]
     >
-    > Built-in RBAC...
+    > Kasten ships with multiple built-in user roles, including `k10-admin` and `k10-basic`. As Kasten is built on Kubernetes-native resources, custom roles can be built and bound to users/groups to define fine-grained access on a per namespace level. This helps to allow secure self-service for end users who may need to manage their own policies or restores without dependence on a data protection administrator.

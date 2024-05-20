@@ -29,3 +29,7 @@ hero:
 
 # Add MD below on Why Kasten      
 ---
+
+## #1 Kubernetes Data Protection and Mobility
+
+*Trusted by the world’s largest organizations, Veeam Kasten delivers secure, Kubernetes native data protection and application mobility, at scale, and across a wide range of distributions and platforms. Proven to recover entire applications quickly and reliably, Kasten gives operations and app teams confidence to withstand the unexpected.*

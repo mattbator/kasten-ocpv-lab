@@ -2,7 +2,11 @@
 
 ## 1. Introduction
 
-In this exercise... this will require working with a partner
+Each Veeam Kasten deployment can function completely independent of other instances, without dependence on a separate customer-hosted or SaaS control plane - making it ideal for GitOps-style management and use in fully airgapped environments. However, Kasten also provides a user interface for providing consolidated observability and centralized management of globally configured Kasten resources - ***Kasten Multi-cluster Manager***.
+
+---
+
+*In this exercise you will configure Kasten Multi-cluster Manager, join a second cluster, and distribute a centrally managed location profile to both clusters. As each learner only has a single cluster, you will need to work with a partner, designating (1) user/cluster as `cluster-1` and (1) user/cluster as `cluster-2`.*
 
 ## 2. Enable Feature Flag
 
@@ -22,11 +26,15 @@ In this exercise... this will require working with a partner
 
 1. When prompted, click ***Refresh***.
 
+    This step has been performed to enable the updated UI for mutli-cluster which will become the standard interface in Veeam Kasten V7.0.
+
 ## 3. Configuring Primary Cluster
 
 > [!IMPORTANT]
 >
 > This section should be completed by the `cluster-1` user ***ONLY***.
+
+The ***Primary*** cluster defines and stores all global resources, such as Policies and Profiles, and also [aggregates a subset of cluster metrics](https://docs.kasten.io/latest/operating/monitoring.html#k10-multi-cluster-metrics) for centralized reporting.
 
 1. In the ***Kasten Dashboard***, select ***Multi-Cluster*** from the sidebar.
 
@@ -100,7 +108,7 @@ In this exercise... this will require working with a partner
 
     > [!TIP]
     >
-    > Docs ref for GitOps style setup...
+    > Joining secondary clusters can also be automated as part of a GitOps-style deployment by creating a `mc-join` Secret and `mc-join-config` ConfigMap on the secondary cluster to provide the join token and name/ingress details. See [docs.kasten.io](https://docs.kasten.io/latest/multicluster/tutorials/getting_started.html#adding-a-secondary-cluster) for details.
 
 ## 5. Managing Global Resources
 
@@ -163,7 +171,7 @@ In this exercise... this will require working with a partner
 
 1. Select ***Distributions*** from the sidebar and click ***+ New Distribution***.
 
-    Distributions allow...
+    Distributions define which global resources should be synced with which clusters, allowing administrators to define label-based rules to automate resource distribution for new Kasten installs joining multi-cluster.
 
 1. Fill out the following fields:
 
@@ -192,6 +200,5 @@ In this exercise... this will require working with a partner
 
 ## 6. Takeaways
 
-- Stuff
-- And
-- Things
+- Kasten Multi-Cluster Manager provides an interface for administrators to manage many Kasten deployments from a single interface
+- Kasten policies and profiles can be centrally defined to simplify change management and ensure consistency across large environments

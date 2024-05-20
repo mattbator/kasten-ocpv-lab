@@ -2,9 +2,11 @@
 
 ## 1. Introduction
 
-In this exercise...
+*In this exercise you will create and run a Kasten policy for protecting Virtual Machines running on OpenShift and test restoring from both local and remote backup sources.*
 
 ## 2. Creating a VM
+
+Fist you will create a new VM in a new project to use for the exercise.
 
 1. In the ***OpenShift Console***, select the ***Project*** menu and click ***Create Project***.
 
@@ -24,7 +26,7 @@ In this exercise...
 
     ![](static/backup-restore/05.png)
 
-    > [!IMPORTANT]
+    > [!NOTE]
     >
     > This will provision the VM with preferred storage settings for the default `ocs-storagecluster-ceph-rbd` StorageClass, specifically ***Block VolumeMode*** to provide the ***ReadWriteMany*** access required to enable live migration.
 
@@ -34,7 +36,7 @@ In this exercise...
 
 ## 3. Enabling Block Mode Exports
 
-> [!IMPORTANT]
+> [!NOTE]
 >
 > As some storage provisioners may not fully support Block volume mode, StorageClasses should first be evaluated for compatibility [using the primer script](https://docs.kasten.io/latest/operating/k10tools.html#k10-primer-block-mount-check). This is skipped in the lab exercise as the `openshift-storage.rbd.csi.ceph.com` provisioner is known to be compatible.
 
@@ -45,9 +47,11 @@ In this exercise...
       k10.kasten.io/sc-supports-block-mode-exports=true
     ```
 
-    > [!NOTE]
+    By default, Kasten provides an out-of-the-box, direct API integration with ODF's Ceph Volume Manager for block data movement - including support for incremental backups to lower storage consumption requirements for protecting Virtual Machines.
+
+    > [!IMPORTANT]
     >
-    > Ceph RBD native API integration...
+    > While many Kubernetes backup solutions can orchestrate local CSI snapshots of a `volumeMode: Block` PVC, it is important to remember that *snapshots do not equal backup* - and that having a backup solution that can provide off-cluster data movement for `volumeMode: Block` PVCs is critical. Support for this capability does **NOT** exist in Velero or OADP today.
 
 ## 4. Creating a Kasten Policy
 
@@ -146,7 +150,7 @@ Kasten can freeze the guest filesystem before the snapshot and unfreeze after th
 
 ## 6. Running the Policy
 
-Rather than wait...
+Rather than wait until the top of the hour for the policy to run, you can manually initiate a policy run programmatically or via the UI. 
 
 1. In ***Kasten Dashboard → Policies → Policies***, click ***Run Once*** for the `kasten-lab-backup` Policy.
 
@@ -170,25 +174,27 @@ Rather than wait...
 
     > [!WARNING]
     >
-    > If your export failed, ensure you didn't miss step...
+    > If your policy fails, review the provided error message for further details. *Did you miss annotating the storage class to allow block exports above?*
 
 ## 7. Performing a Local Restore
 
+When performing an in-place restore on the application's original cluster, choosing the local RestorePoint provides the most rapid recovery as it uses the snapshot data already present on primary storage, rather than having to depend on data which must be transferred from the remote repository.
+
 1. In the ***Kasten Dashboard***, select ***Applications*** from the sidebar.
 
-    You should observe that the `kasten-lab` ***Status*** has changed to ***Compliant***, indicating that...
+    You should observe that the `kasten-lab` ***Status*** has changed to ***Compliant***, indicating that the application is compliant with the backup SLA defined in the policy (i.e. There is a backup for the application created within the last hour to satisfy the hourly policy frequency).
 
-1.  Under `kasten-lab`, select ***... → Restore***.
+2.  Under `kasten-lab`, select ***... → Restore***.
 
     ![](static/backup-restore/19.png)
 
-1. Select the most recent RestorePoint, and click the local version as shown below.
+3. Select the most recent RestorePoint, and click the local version as shown below.
    
     ![](static/backup-restore/20.png)
 
-    You should observe...
+    You should observe by default the selected RestorePoint includes all resources captured as part of the backup will be restored to its original namespace - with options to perform a more granular restore and/or modify the target namespace.
 
-1. Keep the default settings and click ***Restore*** to begin a full, in-place restore.
+4. Keep the default settings and click ***Restore*** to begin a full, in-place restore.
     
     ![](static/backup-restore/21.png)
 
@@ -196,11 +202,11 @@ Rather than wait...
     >
     > Kasten will terminate the running VM and overwrite the existing resources. However, any resources in the namespace that do not exist in the RestorePoint will not be altered (protecting against unintentional data loss).
 
-1. Return to the ***Dashboard*** to monitor the status of the ***Restore*** under ***Actions***.
+5. Return to the ***Dashboard*** to monitor the status of the ***Restore*** under ***Actions***.
 
     You should expect this operation to complete rapidly, as the VM volume is being restored from a local CSI VolumeSnapshot.
 
-1. Once the ***Restore*** has completed, return to ***OpenShift Console → Virtualization → Virtual Machines*** and validate the `fedora-k10` VM is ***Running***.
+6. Once the ***Restore*** has completed, return to ***OpenShift Console → Virtualization → Virtual Machines*** and validate the `fedora-k10` VM is ***Running***.
 
     ![](static/backup-restore/22.png)
 
@@ -215,6 +221,8 @@ Rather than wait...
     > You should observe the volume's ***DataSource*** is a `k10-csi-snap-...` VolumeSnapshot.
 
 ## 8. Performing a Remote Restore
+
+Often local snapshot data may not be available, requiring that data be restored from the remote Kasten repository.
 
 1. In the ***Web Terminal***, run the following to delete the `kasten-lab` namespace:
 
@@ -267,6 +275,11 @@ Rather than wait...
 
 ## 9. Takeaways
 
-- Stuff
-- And
-- Things
+*Congratulations on having protected and restored your first workload using Veeam Kasten!* Below are some of the key takeaways of what has been covered in the lab so far:
+
+- Kasten runs on the cluster and can be deployed via OperatorHub or Helm chart
+- Kasten supports multiple authentication options (Tokens, OIDC, LDAP, OpenShift OAuth) and Kubernetes-native RBAC for controlling access and providing per-namespace self-service
+- Kasten can backup data to S3, Azure Blob, Google Cloud Storage, NFS, and Veeam Backup & Replication
+- Immutable backup support prevents unintended or malicious attempts to delete backup data, providing critical protection against ransomware
+- `Block` mode volumes can provide `ReadWriteMany` access using Ceph RBD, the most performant option for enabling Live Migration of OpenShift Virtual Machines
+- Kasten performs always incremental backups with support for both `Filesystem` and `Block` mode volumes

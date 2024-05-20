@@ -2,7 +2,28 @@
 
 ## 1. Introduction
 
-In this exercise...
+You've now configured everything required to perform a local snapshot of a Kubernetes application using Kasten - *but snapshots are not backup!* In order to restore in the event the local cluster or primary storage is compromised, a copy of that data should be exported to another location.
+
+The configuration of these backup targets are called ***Location Profiles***. Kasten [supports several options](https://docs.kasten.io/latest/usage/configuration.html), including:
+  - AWS S3
+  - Azure Blob
+  - Google Cloud Storage
+  - S3-Compatible
+  - NFS
+  - Veeam Backup & Recovery
+
+Kasten supports the creation of immutable backups to ensure that, as a last line of defense against ransomware, backup data cannot be manipulated or deleted by any user. These backups are supported on the following platforms:
+  - AWS S3
+  - S3-Compatible with Object Lock support (ex. Ceph, MinIO, Wasabi, etc.)
+  - Azure Blob
+
+---
+
+*In this exercise, you will configure an immutable bucket using the on-cluster Ceph Object Gateway deployment and add the bucket as a Location Profile in Kasten.*
+
+> [!CRITICAL]
+>
+> In a real world environment you should never back up data to the same infrastructure you are intending to protect - using on-cluster storage as a backup target is performed in the lab solely to simplify lab staging and instructions. 
 
 ## 2. Configuring Immutable Ceph Object Gateway Bucket
 
