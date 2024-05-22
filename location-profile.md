@@ -21,7 +21,7 @@ Kasten supports the creation of immutable backups to ensure that, as a last line
 
 *In this exercise, you will configure an immutable bucket using the on-cluster Ceph Object Gateway deployment and add the bucket as a Location Profile in Kasten.*
 
-> [!CRITICAL]
+> [!CAUTION]
 >
 > In a real world environment you should never back up data to the same infrastructure you are intending to protect - using on-cluster storage as a backup target is performed in the lab solely to simplify lab staging and instructions. 
 

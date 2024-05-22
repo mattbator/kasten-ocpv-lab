@@ -39,7 +39,7 @@ Unlike the "Snapshot" policy created in a previous exercise, an "Import" policy 
 
     ![](static/mobility/3b.png)
 
-    > [!CRITICAL]
+    > [!CAUTION]
     >
     > Ensure `global-profile-example` is selected, not `ceph-rgw-immutable` - this is because `global-profile-example` points to the backup repository on `cluster-1`, whereas the `ceph-rgw-immutable` profile on `cluster-2` points to its own, local Ceph bucket.
 

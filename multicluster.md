@@ -179,7 +179,7 @@ The ***Primary*** cluster defines and stores all global resources, such as Polic
     |---|---|
     | ***Name*** | `example-distribution` |
     | ***Clusters*** | Select `dist.kio.kasten.io/cluster-type:primary` |
-    | | Select `dist.kio.kasten.io/cluster-type:primary` |
+    | | Select `dist.kio.kasten.io/cluster-type:secondary` |
     | ***Resources*** | Select `global-profile-example` |
 
     ![](static/multicluster/15.png)
