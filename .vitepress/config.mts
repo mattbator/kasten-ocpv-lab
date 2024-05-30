@@ -4,7 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Veeam Kasten Lab Guide - OpenShift Virtualization Roadshow",
   description: "Add-on lab exercises for enterprise-ready Kubernetes data protection",
-  base: "/kasten-ocpv-lab/",
+  base: "/",
   head: [['link', { rel: 'icon', href: './favicon.ico' }]],
   cleanUrls: true,
   themeConfig: {
