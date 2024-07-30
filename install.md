@@ -20,57 +20,7 @@ This add-on lab guide is intended to familiarize practitioners with the protecti
 
 *In the first exercise you will install Veeam Kasten through the OpenShift OperatorHub and access the dashboard user interface via an OpenShift Route.*
 
-## 2. Running Primer Script
-
-1. In the ***OpenShift Console***, open the ***Web Terminal*** and click ***Start*** to initialize the terminal (if prompted).
-
-    ![](static/install/01.png)
-
-1. In the ***Web Terminal***, run the following to run the Kasten "primer" script to evaluate your target cluster configuration prior to Kasten installation:
-
-    ```bash
-    helm repo add kasten https://charts.kasten.io/
-
-    helm repo update
-
-    curl -s https://docs.kasten.io/tools/k10_primer.sh  | bash
-    ```
-
-    You should expect to see one or more occurrences of the error below:
-
-    ```
-    ...
-    At least 1 VolumeSnapshotClass needs the k10.kasten.io/is-snapshot-class annotation set to true. - Error // [!code error]
-    ...
-    ```
-
-    The `k10.kasten.io/is-snapshot-class` annotation is used by Kasten to determine which VolumeSnapshotClass should be used by Kasten to request CSI snapshots for PersistentVolumes provisioned by a given CSI provider.
-
-1. Run the following to annotate the available VolumeSnapshotClasses and re-run the primer script:
-
-    ```bash
-    oc annotate volumesnapshotclass \
-      ocs-storagecluster-rbdplugin-snapclass \
-      k10.kasten.io/is-snapshot-class=true
-    
-    oc annotate volumesnapshotclass \
-      ocs-storagecluster-cephfsplugin-snapclass \
-      k10.kasten.io/is-snapshot-class=true
-
-    curl -s https://docs.kasten.io/tools/k10_primer.sh  | bash
-    ```
-
-    The primer should now complete without errors, indicating any common configuration issues have been addressed.
-
-    > [!NOTE]
-    >
-    > Running the primer script is not required to install Kasten, but is highly recommended.
-    >
-    > The script can also be used to validate CSI VolumeSnapshot creation and restore capabilities. See [docs.kasten.io](https://docs.kasten.io/latest/install/storage.html#csi-preflight).
-
-1. Close the ***Web Terminal***.
-
-## 3. Installing Kasten
+## 2. Installing Kasten
 
 1. In the ***OpenShift Console***, search for `Kasten` in the ***OperatorHub*** and select ***Kasten K10 (Free)***:
 
@@ -80,13 +30,23 @@ This add-on lab guide is intended to familiarize practitioners with the protecti
     >
     > Alternate versions of the Kasten operator are available for use if transacting Kasten licensing through the Red Hat Marketplace.
     >
-    > If desired, Kasten may also be [installed on OpenShift via Helm chart](https://docs.kasten.io/latest/install/openshift/helm.html#helm-based-installation). 
+    > If desired, Kasten may also be [installed on OpenShift via Helm chart](https://docs.kasten.io/latest/install/openshift/helm.html#helm-based-installation).
 
-1. Click ***Install***.
+1. Under ***Version***, select `7.0.5` from the dropdown menu, and click ***Install***.
 
-1. Click ***Install*** to initiate operator installation using the default settings.
+    ![](static/install/02b.png)
+
+    > [!IMPORTANT]
+    >
+    > It's recommended to always run the latest available version of Kasten. Explicitly selecting version `7.0.5` is to ensure consistent instructions and corresponding screenshots in this lab guide.
+
+1. Under ***Update approval*** select ***Manual*** and then click ***Install*** to initiate operator installation.
 
     ![](static/install/03.png)
+
+1. When prompted, click ***Approve*** to proceed with operator installation.
+
+    ![](static/install/03b.png)
 
 1. After operator installation completes, click ***View Operator*** (or select ***Operators → Installed Operators → Kasten K10 (Free)*** from the sidebar).
 
@@ -94,19 +54,44 @@ This add-on lab guide is intended to familiarize practitioners with the protecti
 
     ![](static/install/04.png)
 
-1. Under ***Form view***, toggle the following options to ***True***:
+1. Select ***YAML view*** and overwrite the default options with the configuration below:
 
-    - ***Enable Token Based Authentication***
-    - ***Enable K10 dashboard to be exposed via route***
-    - ***Create secured edge route for exposing K10***
+    ```yaml
+    apiVersion: apik10.kasten.io/v1alpha1
+    kind: K10
+    metadata:
+      name: k10
+      namespace: kasten-io
+      annotations:
+        helm.sdk.operatorframework.io/rollback-force: 'false'
+    spec:
+      auth:
+        openshift:
+          enabled: true
+          dashboardURL: https://k10-route-kasten-io.apps.YOUR-WORKSHOP-ID.dynamic.redhatworkshops.io/k10
+          openshiftURL: https://172.30.0.1:443
+          insecureCA: true
+      route:
+        enabled: true
+        tls:
+          enabled: true
+    ```
 
-    ![](static/install/05.png)
+1. Replace `YOUR-WORKSHOP-ID` with the 5 character identifier for your lab environment DNS, as shown in the screenshot below:
+
+    ![](static/install/05b.png)
+
+    This configuration will enable integration with the built-in OpenShift OAuth server and the creation of a `Route` for secure, multi-user access to the Kasten dashboard.
 
     > [!NOTE]
     >
-    > The Kasten installation can be further customized using the YAML view. A complete list of configuration parameters is [available on docs.kasten.io](https://docs.kasten.io/latest/install/advanced.html#complete-list-of-k10-helm-options). 
+    > A complete list of configuration parameters is [available on docs.kasten.io](https://docs.kasten.io/latest/install/advanced.html#complete-list-of-k10-helm-options). 
 
 1. Click ***Create***.
+
+1. Open the ***Web Terminal*** and click ***Start*** to initialize the terminal (if prompted).
+
+    ![](static/install/01.png)
 
 1. From the ***Web Terminal***, run the following to monitor the installation:
 
@@ -114,33 +99,43 @@ This add-on lab guide is intended to familiarize practitioners with the protecti
     watch oc get pods -n kasten-io
     ```
 
-1. Once all Deployments are ***READY***, press `CTRL+C` to end the `watch`.
+1. Once all Deployments are `READY`, press `CTRL+C` to end the `watch`.
 
     ![](static/install/06.png)
 
-1. Run the following to obtain the token for the `admin` user currently logged into the OpenShift console and copy the output to the clipboard:
+1. As a final deployment step, annotate the available VolumeSnapshotClasses for use with Kasten:
 
     ```bash
-    oc whoami -t
+    oc annotate volumesnapshotclass \
+      ocs-storagecluster-rbdplugin-snapclass \
+      k10.kasten.io/is-snapshot-class=true
+
+    oc annotate volumesnapshotclass \
+      ocs-storagecluster-cephfsplugin-snapclass \
+      k10.kasten.io/is-snapshot-class=true
     ```
 
-    > [!NOTE]
+    > [!IMPORTANT]
     >
-    > This token will be used to authenticate to Kasten as your current OpenShift user. In addition to Kubernetes bearer tokens, Kasten also supports authentication using OpenID Connect (OIDC), Active Directory (LDAP), and OpenShift's built-in OAuth server. 
+    > The `k10.kasten.io/is-snapshot-class` annotation is used by Kasten to determine which VolumeSnapshotClass should be used by Kasten to request CSI snapshots for PersistentVolumes provisioned by a given CSI provider.
 
-2. Close the ***Web Terminal***.
+1.  Close the ***Web Terminal***.
 
-## 4. Accessing the Kasten Dashboard
+## 3. Accessing the Kasten Dashboard
 
 1. In the ***OpenShift Console***, select ***Networking → Routes*** from the sidebar and open the `k10-route` Route URL.
 
     ![](static/install/07.png)
 
-1. Paste the `admin` token value from the previous exercise and click ***Sign-in***.
+    You should be redirected to the OpenShift OAuth login prompt.
+
+1. Use the OpenShift Console `admin` credentials provided as part of your lab environment and click ***Log-in***.
 
     ![](static/install/08.png)
 
-1. Specify ***Email*** and ***Company name*** values and click ***Accept Terms***.
+1. When prompted, select ***Allow selected permissions*** to allow Kasten read-only access to username and group membership details from the OpenShift OAuth server.
+
+1. Specify your ***Email Address*** and ***Company*** values and click ***Accept Terms***.
 
     ![](static/install/09.png)
 

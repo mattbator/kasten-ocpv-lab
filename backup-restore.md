@@ -6,7 +6,7 @@
 
 ## 2. Creating a VM
 
-Fist you will create a new VM in a new project to use for the exercise.
+Fist you will create a new VM in a new project to use for the exercise. 
 
 1. In the ***OpenShift Console***, select the ***Project*** menu and click ***Create Project***.
 
@@ -14,9 +14,13 @@ Fist you will create a new VM in a new project to use for the exercise.
 
 1. Specify `kasten-lab` as the ***Name*** and click ***Create***.
 
-1. Select ***Virtualization → Virtual Machines*** from the sidebar, and click ***Create VirtualMachine*** in the `kasten-lab` Project.
+1. Select ***Virtualization → Virtual Machines*** from the sidebar, and click ***Create VirtualMachine → From template*** in the `kasten-lab` Project.
 
     ![](static/backup-restore/03.png)
+
+    > [!CAUTION]
+    >
+    > Kasten can be used to protect VMs provisioned using an `InstanceType` but currently requires a manual transform be applied during the restore process, which is out of the scope of this lab exercise. Full support for `InstanceTypes` will be added in an upcoming release.
 
 1. Under ***Template catalog***, select the `fedora-server-small` template.
 
@@ -28,9 +32,9 @@ Fist you will create a new VM in a new project to use for the exercise.
 
     > [!NOTE]
     >
-    > This will provision the VM with preferred storage settings for the default `ocs-storagecluster-ceph-rbd` StorageClass, specifically ***Block VolumeMode*** to provide the ***ReadWriteMany*** access required to enable live migration.
+    > This will provision the VM with preferred storage settings for the `ocs-storagecluster-ceph-rbd-virtualization` StorageClass, specifically ***Block VolumeMode*** to provide the ***ReadWriteMany*** access required to enable live migration between OpenShift nodes.
 
-1. Validate the `fedora-k10` PersistentVolumeClaim configuration from ***Storage → PersistentVolumeClaims*** in the sidebar.
+2. Validate the `fedora-k10` PersistentVolumeClaim configuration from ***Storage → PersistentVolumeClaims*** in the sidebar.
 
     ![](static/backup-restore/06.png)
 
@@ -40,10 +44,10 @@ Fist you will create a new VM in a new project to use for the exercise.
 >
 > As some storage provisioners may not fully support Block volume mode, StorageClasses should first be evaluated for compatibility [using the primer script](https://docs.kasten.io/latest/operating/k10tools.html#k10-primer-block-mount-check). This is skipped in the lab exercise as the `openshift-storage.rbd.csi.ceph.com` provisioner is known to be compatible.
 
-1. In the ***Web Terminal***, run the following to allow the Kasten datamover to export raw Block volumes using the `ocs-storagecluster-ceph-rbd` StorageClass:
+1. In the ***Web Terminal***, run the following to allow the Kasten datamover to export raw Block volumes using the `ocs-storagecluster-ceph-rbd-virtualization` StorageClass:
 
     ```bash
-    oc annotate storageclass ocs-storagecluster-ceph-rbd \
+    oc annotate storageclass ocs-storagecluster-ceph-rbd-virtualization \
       k10.kasten.io/sc-supports-block-mode-exports=true
     ```
 
@@ -61,7 +65,7 @@ Fist you will create a new VM in a new project to use for the exercise.
 
     Your `kasten-lab` application should appear as ***Unmanaged***, indicating it is not being protected by any policy.
 
-    > [!TIP]
+    <!-- > [!TIP]
     >
     > Namespaces, including the `openshift-...` system namespaces can be excluded from the ***Applications*** list (and compliance reporting) by adding a list of `excludedApps` to the K10 Operand `spec`, as shown:
     >
@@ -71,7 +75,7 @@ Fist you will create a new VM in a new project to use for the exercise.
     >
     > ```bash
     > oc get ns --no-headers=true | awk 'BEGIN { print "  excludedApps:" } /^openshift/{print "    -",$1}'
-    > ```
+    > ``` -->
 
 2. Click `kasten-lab` in the ***Applications*** list to view details about the workloads and additional resources discovered within the namespace.
 
@@ -117,7 +121,7 @@ Fist you will create a new VM in a new project to use for the exercise.
 
     > [!NOTE]
     >
-    > Targeting application(s) based on namespace is generally the most straightforward method of defining a backup policy. However, Kasten also allows you to identify applications based on native Kubernetes labels. This is especially helpful if you want to define "blanket" policies that will apply to current and ***future*** applications, such as `hasData: true` or `backup: gold`.
+    > Targeting application(s) based on namespace is generally the most straightforward method of defining a backup policy. However, Kasten also allows you to identify applications based on native Kubernetes labels. This is especially helpful if you have many VMs in a single namespace and only want to protect current and ***future*** VMs with a specific label on the `VirtualMachine` resource, such as `backup: gold` or `vm: prod`.
     >
     > Kasten also provides rich filtering capabilities to include or exclude resources based on Kubernetes ***API Group***, ***API Version***, ***Resource Type***, ***Resource Name***, and ***Labels***. For example, you could exclude backup for ***Secrets*** resources where a label includes an indication that the secret is externally managed.
 
@@ -174,7 +178,9 @@ Rather than wait until the top of the hour for the policy to run, you can manual
 
     > [!WARNING]
     >
-    > If your policy fails, review the provided error message for further details. *Did you miss annotating the storage class to allow block exports above?*
+    > If your policy fails, review the provided error message for further details. *Did you skip [annotating the storage class to allow block mode exports](./backup-restore#_3-enabling-block-mode-exports) earlier in the lab?*
+    >
+    > ![](static/backup-restore/18b.png)
 
 ## 7. Performing a Local Restore
 
@@ -218,11 +224,11 @@ When performing an in-place restore on the application's original cluster, choos
     > oc describe pvc fedora-k10 -n kasten-lab
     > ```
     >
-    > You should observe the volume's ***DataSource*** is a `k10-csi-snap-...` VolumeSnapshot.
+    > You should observe the volume's ***DataSource*** is a `k10-csi-snap-...` VolumeSnapshot, confirming the volume was restored from a local snapshot.
 
 ## 8. Performing a Remote Restore
 
-Often local snapshot data may not be available, requiring that data be restored from the remote Kasten repository.
+Often, local snapshot data may not be available, requiring that data be restored from the remote Kasten repository.
 
 1. In the ***Web Terminal***, run the following to delete the `kasten-lab` namespace:
 
@@ -241,27 +247,29 @@ Often local snapshot data may not be available, requiring that data be restored 
 
 1. In the ***Kasten Dashboard***, select ***Applications*** from the sidebar.
 
-1. Click the ***All*** dropdown menu and select ***Removed*** to view the list of non-existent namespaces with available RestorePoints.
+    You should observe that `kasten-lab` no longer appears in the list of applications as the namespace no longer exists on the cluster.
+
+2. Click the ***All*** dropdown menu and select ***Removed*** to view the list of non-existent namespaces with available RestorePoints.
 
     ![](static/backup-restore/23.png)
 
-1.  Under `kasten-lab`, select ***... → Restore***.
+3.  Under `kasten-lab`, select ***... → Restore***.
 
-1. Select the most recent RestorePoint, and click the ***EXPORTED*** version as shown below.
+4. Select the most recent RestorePoint, and click the ***EXPORTED*** version as shown below.
    
     ![](static/backup-restore/24.png)
 
-1. Under ***Application Name***, click ***+ Create New Namespace***.
+5. Under ***Application Name***, click ***+ Create New Namespace***.
 
-1. Specify `kasten-lab-clone` as the ***New Namespace*** and click ***Create***.
+6. Specify `kasten-lab-clone` as the ***New Namespace*** and click ***Create***.
    
     ![](static/backup-restore/25.png)
 
-1. Click ***Restore*** and return to the ***Dashboard*** to monitor progress under ***Actions***.
+7. Click ***Restore*** and return to the ***Dashboard*** to monitor progress under ***Actions***.
 
     ![](static/backup-restore/26.png)
 
-1. Return to ***OpenShift Console → Virtualization → VirtualMachines*** and observe the `fedora-k10` VirtualMachine now running in the `kasten-lab-clone` namespace.
+8. Return to ***OpenShift Console → Virtualization → VirtualMachines*** and observe the `fedora-k10` VirtualMachine now running in the `kasten-lab-clone` namespace.
 
     ![](static/backup-restore/27.png)
 

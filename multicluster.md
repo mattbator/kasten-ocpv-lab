@@ -6,31 +6,15 @@ Each Veeam Kasten deployment can function completely independent of other instan
 
 ---
 
-*In this exercise you will configure Kasten Multi-cluster Manager, join a second cluster, and distribute a centrally managed location profile to both clusters. As each learner only has a single cluster, you will need to work with a partner, designating (1) user/cluster as `cluster-1` and (1) user/cluster as `cluster-2`.*
-
-## 2. Enable Feature Flag
+*In this exercise you will configure Kasten Multi-cluster Manager, join a second cluster, and distribute a centrally managed location profile to both clusters.* 
 
 > [!IMPORTANT]
 >
-> This section should be completed by ***BOTH*** the `cluster-1` user and `cluster-2` user.
+> As each learner only has a single cluster, you will need to work with a partner, designating (1) user/cluster as `cluster-1` and (1) user/cluster as `cluster-2`.*
 
-1. In the ***Web Terminal***, run the following to resolve the Kasten Feature Flag URL for your cluster:
+## 2. Configuring Primary Cluster
 
-    ```bash
-    echo "https://$(oc get route k10-route -n kasten-io -o jsonpath='{.spec.host}')/k10/#/features"
-    ```
-
-1. Open the URL in your browser and enable ***Join from Secondary*** as shown.
-
-    ![](static/multicluster/01.png)
-
-1. When prompted, click ***Refresh***.
-
-    This step has been performed to enable the updated UI for mutli-cluster which will become the standard interface in Veeam Kasten V7.0.
-
-## 3. Configuring Primary Cluster
-
-> [!IMPORTANT]
+> [!CAUTION]
 >
 > This section should be completed by the `cluster-1` user ***ONLY***.
 
@@ -42,7 +26,7 @@ The ***Primary*** cluster defines and stores all global resources, such as Polic
 
     ![](static/multicluster/02.png)
 
-1. Specify `cluster-1` as the ***Primary Name*** and click ***Setup → Confirm***.
+1. Specify `cluster-1` as the ***Primary Name*** and click ***Promote Cluster → Confirm***.
 
     ![](static/multicluster/03.png)
 
@@ -70,17 +54,18 @@ The ***Primary*** cluster defines and stores all global resources, such as Polic
 
 2. Click ***Copy*** to copy the token value to the clipboard and send the value to your `cluster-2` partner via one of the following:
 
-    - Slack
+    - Email/Slack/etc.
     - Slowly reading it aloud 😡
     - Carrier pigeon 🪶
     - Writing it down on a Post-It and burning it after use 🤷‍♂️
-    - Probably stick with Slack 👍
+    - Probably stick with Email/Slack/etc. 👍
+    - In real life, token values could be distributed to clusters using any Kubernetes Secrets management solution (ex. Vault + External Secrets Operator)
 
 1. Click ***Done***.
 
-## 4. Joining Multi-Cluster from Secondary
+## 3. Joining Multi-Cluster from Secondary
 
-> [!IMPORTANT]
+> [!CAUTION]
 >
 > This section should be completed by the `cluster-2` user ***ONLY***.
 
@@ -110,9 +95,9 @@ The ***Primary*** cluster defines and stores all global resources, such as Polic
     >
     > Joining secondary clusters can also be automated as part of a GitOps-style deployment by creating a `mc-join` Secret and `mc-join-config` ConfigMap on the secondary cluster to provide the join token and name/ingress details. See [docs.kasten.io](https://docs.kasten.io/latest/multicluster/tutorials/getting_started.html#adding-a-secondary-cluster) for details.
 
-## 5. Managing Global Resources
+## 4. Managing Global Resources
 
-> [!IMPORTANT]
+> [!CAUTION]
 >
 > This section should be completed by the `cluster-1` user ***ONLY***.
 
@@ -128,13 +113,24 @@ The ***Primary*** cluster defines and stores all global resources, such as Polic
 
     > [!NOTE]
     > 
-    > In a production environment this can be modified...
+    > In a production environment this can be modified to give granular control over a subset of clusters to different users or groups.
 
 1. Keep the default settings and click ***Save***.
 
 1. Select ***Clusters*** from the sidebar and click into `cluster-2` to validate it is accessible. The sidebar dropdown menu can be used to browse between available clusters and the ***Multi-Cluster Manager***.
 
     ![](static/multicluster/12.png)
+
+1. In ***Kasten Multi-Cluster Manager***, select ***Global Profiles → Location*** from the sidebar and click ***+ New Profile***.
+
+    ![](static/multicluster/13.png)
+
+1. Fill out the following fields and click ***Next***:
+
+    |  |  |
+    |---|---|
+    | ***Profile Name*** | `global-profile-example` |
+    | ***Storage Provider*** | S3 Compatible |
 
 1. In the ***Web Terminal***, run the following to fetch your existing Ceph Object Gateway bucket details:
 
@@ -151,16 +147,10 @@ The ***Primary*** cluster defines and stores all global resources, such as Polic
     printf '%s\n' 'ACCESS KEY:' ${AWS_ACCESS_KEY_ID} 'SECRET KEY:' ${AWS_SECRET_ACCESS_KEY} 'ENDPOINT:' ${CEPH_S3_ENDPOINT}
     ```
 
-1. In ***Kasten Multi-Cluster Manager***, select ***Global Profiles → Location*** from the sidebar and click ***+ New Profile***
-
-    ![](static/multicluster/13.png)
-
-1. Fill out the following fields and click ***Save***:
+1. Return to the ***Kasten Multi-Cluster Manager*** and fill out the following fields:
 
     |  |  |
     |---|---|
-    | ***Profile Name*** | `global-profile-example` |
-    | ***Storage Provider*** | S3 Compatible |
     | ***S3 Access Key*** | Paste `ACCESS KEY` value |
     | ***S3 Secret*** | Paste `SECRET KEY` value |
     | ***Endpoint*** | Paste `ENDPOINT` value |
@@ -168,6 +158,8 @@ The ***Primary*** cluster defines and stores all global resources, such as Polic
     | ***Bucket*** | `kasten` |
 
     ![](static/multicluster/14.png)
+
+1. Click ***Next → Submit***.
 
 1. Select ***Distributions*** from the sidebar and click ***+ New Distribution***.
 
@@ -198,7 +190,7 @@ The ***Primary*** cluster defines and stores all global resources, such as Polic
     >
     > ![](static/multicluster/17.png)
 
-## 6. Takeaways
+## 5. Takeaways
 
 - Kasten Multi-Cluster Manager provides an interface for administrators to manage many Kasten deployments from a single interface
 - Kasten policies and profiles can be centrally defined to simplify change management and ensure consistency across large environments

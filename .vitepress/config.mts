@@ -31,7 +31,7 @@ export default defineConfig({
         items: [
           { text: 'Installing Veeam Kasten', link: '/install' },
           { text: 'Creating Location Profiles', link: '/location-profile' },
-          { text: 'Enabling K10DR', link: '/k10dr' },
+          // { text: 'Enabling K10DR', link: '/k10dr' },
           { text: 'Protecting Virtual Machines', link: '/backup-restore' }
         ]
       },

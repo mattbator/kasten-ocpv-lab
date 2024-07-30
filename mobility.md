@@ -4,7 +4,7 @@
 
 *In this exercise you will restore an OpenShift Virtual Machine to an alternate cluster from a Kasten backup.*
 
-> [!IMPORTANT]
+> [!CAUTION]
 >
 > This exercise should be completed by the `cluster-1` user ***ONLY***.
 
@@ -69,7 +69,7 @@ Simply update the `kasten-lab-import` Policy's frequency from ***On-Demand*** to
 
 > *What if you need to make changes such as targeting an alternate StorageClass for restore or modifying the Route hostname?*
 
-Kasten provides a robust transformation engine, allowing you to...
+Kasten provides a robust transformation engine, allowing you to test, add, delete, copy, or replace key value pairs in a resource's manifest.
 
 Check out the video below to see an example of creating and applying transforms to an application migrating from an on-premises OpenShift cluster to a ROSA cluster:
 
