@@ -1,4 +1,4 @@
-# Installing Veeam Kasten <Badge type="tip" text="v6.5.13" />
+# Installing Veeam Kasten <Badge type="tip" text="v7.0.5" />
 
 ## 1. Introduction
 
