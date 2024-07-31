@@ -69,7 +69,7 @@ This add-on lab guide is intended to familiarize practitioners with the protecti
         openshift:
           enabled: true
           dashboardURL: https://k10-route-kasten-io.apps.YOUR-WORKSHOP-ID.dynamic.redhatworkshops.io/k10
-          openshiftURL: https://172.30.0.1:443
+          openshiftURL: https://apiserver.openshift-kube-apiserver.svc.cluster.local
           insecureCA: true
       route:
         enabled: true
