@@ -32,9 +32,9 @@ Fist you will create a new VM in a new project to use for the exercise.
 
     > [!NOTE]
     >
-    > This will provision the VM with preferred storage settings for the `ocs-storagecluster-ceph-rbd-virtualization` StorageClass, specifically ***Block VolumeMode*** to provide the ***ReadWriteMany*** access required to enable live migration between OpenShift nodes.
+    > This will provision the VM with preferred storage settings for the `ocs-external-storagecluster-ceph-rbd` StorageClass, specifically ***Block VolumeMode*** to provide the ***ReadWriteMany*** access required to enable live migration between OpenShift nodes.
 
-2. Validate the `fedora-k10` PersistentVolumeClaim configuration from ***Storage → PersistentVolumeClaims*** in the sidebar.
+2. Validate the `fedora-k10-volume` PersistentVolumeClaim configuration from ***Storage → PersistentVolumeClaims*** in the sidebar.
 
     ![](static/backup-restore/06.png)
 
@@ -44,10 +44,10 @@ Fist you will create a new VM in a new project to use for the exercise.
 >
 > As some storage provisioners may not fully support Block volume mode, StorageClasses should first be evaluated for compatibility [using the primer script](https://docs.kasten.io/latest/operating/k10tools.html#k10-primer-block-mount-check). This is skipped in the lab exercise as the `openshift-storage.rbd.csi.ceph.com` provisioner is known to be compatible.
 
-1. In the ***Web Terminal***, run the following to allow the Kasten datamover to export raw Block volumes using the `ocs-storagecluster-ceph-rbd-virtualization` StorageClass:
+1. In the ***Web Terminal***, run the following to allow the Kasten datamover to export raw Block volumes using the `ocs-external-storagecluster-ceph-rbd` StorageClass:
 
     ```bash
-    oc annotate storageclass ocs-storagecluster-ceph-rbd-virtualization \
+    oc annotate storageclass ocs-external-storagecluster-ceph-rbd \
       k10.kasten.io/sc-supports-block-mode-exports=true
     ```
 

@@ -16,6 +16,7 @@ Kasten supports the creation of immutable backups to ensure that, as a last line
   - AWS S3
   - S3-Compatible with Object Lock support (ex. Ceph, MinIO, Wasabi, etc.)
   - Azure Blob
+  - Google Cloud Storage
 
 ---
 
@@ -25,88 +26,38 @@ Kasten supports the creation of immutable backups to ensure that, as a last line
 >
 > In a real world environment you should never back up data to the same infrastructure you are intending to protect - using on-cluster storage as a backup target is performed in the lab solely to simplify lab staging and instructions. 
 
-## 2. Configuring Immutable Ceph Object Gateway Bucket
+## 2. Configuring an Object Bucket Claim to Store Backups
 
-1. In your local terminal, connect to the environment using your ***Red Hat Demo Platform*** environment details:
+   > [!CAUTION]
+   >
+   > Kasten supports immutable object storage and it is recommended to protect backups against accidental deletion or ransomware attack.  For this lab, we won't
+   configure immutability as it 
 
-    ```bash
-    ssh lab-user@YOUR-LAB-IP-OR-FQDN
-    ```
+1. Open an OpenShift command line terminal
 
-    Or use the `SSH Terminal` session built into your ***Showroom*** lab guide as shown below:
+    ![](static/location-profile/002.png)
 
-    ![](static/location-profile/00.png)
-
-1. From the `[lab-user@hypervisor ~]$` prompt, connect to your bastion host for CLI access:
-
-    ```bash
-    sudo ssh root@192.168.123.100
-    ```
-
-1. From the `[root@ocp4-bastion ~]#` prompt, create an externally accessible Route for the ODF `rook-ceph-rgw-ocs-storagecluster-cephobjectstore` Service:
+1. Run the following command to retrieve the Access Key for the Multicloud Object Gateway:
 
     ```bash
-    cat <<EOF | oc create -f - 
-    kind: Route
-    apiVersion: route.openshift.io/v1
-    metadata:
-      name: s3-route
-      namespace: openshift-storage
-    spec:
-      to:
-        kind: Service
-        name: rook-ceph-rgw-ocs-storagecluster-cephobjectstore
-      tls:
-        termination: reencrypt
-        insecureEdgeTerminationPolicy: Redirect
-      port:
-        targetPort: https
-    EOF
-
-    export CEPH_S3_ENDPOINT="https://$(oc get route \
-      s3-route -n openshift-storage -o jsonpath='{.spec.host}')"
-
-    echo $CEPH_S3_ENDPOINT
+    oc get secret -n backuptarget kastenbackups -ojsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 --decode && echo
     ```
+    Copy the Access Key to a text editor as it will be needed again shortly
 
-    This will be used by Kasten to access the S3 bucket to export and restore backup data.
 
-1. Install the `aws` CLI tool:
+1. Run the following command to retrieve the Secret Key for the Multicloud Object Gateway:
 
     ```bash
-    sudo yum install awscli -y
+    oc get secret -n backuptarget kastenbackups -ojsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 --decode && echo
     ```
+    Copy the Secret Key to a text editor as it will be needed again shortly
 
-2. Configure credentials used by `aws` CLI tool to connect to the on-cluster Ceph Object Gateway deployment:
+2. Run the following command to retrieve the S3 endpoint address
 
     ```bash
-    export AWS_ACCESS_KEY_ID=$(oc get secret \
-      rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ocs-storagecluster-cephobjectstoreuser \
-      -n openshift-storage -o jsonpath='{.data.AccessKey}' | base64 --decode)
-
-    export AWS_SECRET_ACCESS_KEY=$(oc get secret \
-      rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ocs-storagecluster-cephobjectstoreuser \
-      -n openshift-storage -o jsonpath='{.data.SecretKey}' | base64 --decode)
+    oc get route s3 -n openshift-storage -ojson | jq -r '.spec.host'
     ```
-
-3. Create a bucket named `kasten` with S3 Object Lock enabled, and configure a 5 day default object retention policy:
-
-    ```bash
-    aws --endpoint=${CEPH_S3_ENDPOINT} s3api create-bucket \
-      --bucket kasten --object-lock-enabled-for-bucket
-
-    aws --endpoint=${CEPH_S3_ENDPOINT} s3api put-object-lock-configuration \
-      --bucket kasten \
-      --object-lock-configuration '{ "ObjectLockEnabled": "Enabled", "Rule": { "DefaultRetention": { "Mode": "COMPLIANCE", "Days": 5 }}}'
-    ```
-
-    S3 Versioning & Object Locking are the mechanisms by which S3-compatible storage ensures that objects cannot be changed or deleted during the compliance period. Kasten integrates with these capabilities to automatically monitor and extend object lock metadata on objects within the Kasten backup repository, according to each application's retention requirements.
-
-4. Save the values that will be used to configure your Kasten Location Profile in the next lab section:
-
-    ```bash
-    printf '%s\n' 'ACCESS KEY:' ${AWS_ACCESS_KEY_ID} 'SECRET KEY:' ${AWS_SECRET_ACCESS_KEY} 'ENDPOINT:' ${CEPH_S3_ENDPOINT}
-    ```
+    Copy the Endpoint Address to a text editor as it will be needed again shortly
 
 ## 3. Creating an S3-Compatible Location Profile
 
@@ -118,7 +69,7 @@ Kasten supports the creation of immutable backups to ensure that, as a last line
 
     |  |  |
     |---|---|
-    | ***Location Profile Name*** | `ceph-rgw-immutable` |
+    | ***Location Profile Name*** | `kastenbackups` |
     | ***Storage Provider*** | S3 Compatible |
 
     ![](static/location-profile/02.png)
@@ -135,13 +86,6 @@ Kasten supports the creation of immutable backups to ensure that, as a last line
 
     ![](static/location-profile/02b.png)
 
-1. Select ***Enable Immutable Backups*** and click the ***Validate Bucket*** button.
-
-    ![](static/location-profile/03.png)
-
-    You should expect for all checks to pass, as shown. If you encounter errors, verify your ***Endpoint***, ***Access***, ***Secret***, and ***Bucket*** values are correct before attempting to validate again.
-
-1. Drag the ***Protection Period*** slider to set how far into the past you want to be able to access immutable backup data.
 
 1. Click ***Next → Save Profile***.
 
