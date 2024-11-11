@@ -18,7 +18,12 @@ This add-on lab guide is intended to familiarize practitioners with the protecti
 
 ---
 
-*In the first exercise you will install Veeam Kasten through the OpenShift OperatorHub and access the dashboard user interface via an OpenShift Route.*
+    > [!IMPORTANT]
+    >
+    > We have pre-staged the lab with an install of Veeam Kasten, so there's no need to complete the steps in Section 2.
+    > Rather, this section just highlights how'd you go about installing Kasten if it were not already installed on
+    > the OpenShift cluster.
+
 
 ## 2. Installing Kasten
 
@@ -32,7 +37,7 @@ This add-on lab guide is intended to familiarize practitioners with the protecti
     >
     > If desired, Kasten may also be [installed on OpenShift via Helm chart](https://docs.kasten.io/latest/install/openshift/helm.html#helm-based-installation).
 
-1. Under ***Version***, select `7.0.5` from the dropdown menu, and click ***Install***.
+1. Under ***Version***, select `7.0.12` from the dropdown menu, and click ***Install***.
 
     ![](static/install/02b.png)
 
@@ -107,11 +112,11 @@ This add-on lab guide is intended to familiarize practitioners with the protecti
 
     ```bash
     oc annotate volumesnapshotclass \
-      ocs-storagecluster-rbdplugin-snapclass \
+      ocs-external-storagecluster-rbdplugin-snapclass  \
       k10.kasten.io/is-snapshot-class=true
 
     oc annotate volumesnapshotclass \
-      ocs-storagecluster-cephfsplugin-snapclass \
+      ocs-external-storagecluster-cephfsplugin-snapclass \
       k10.kasten.io/is-snapshot-class=true
     ```
 
