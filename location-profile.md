@@ -82,7 +82,7 @@ Kasten supports the creation of immutable backups to ensure that, as a last line
     | ***S3 Secret*** | Paste `SECRET KEY` value |
     | ***Endpoint*** | Paste `ENDPOINT` value |
     | ***Region*** | `us-east-1` |
-    | ***Bucket*** | `kasten` |
+    | ***Bucket*** | `kastenbackups` |
 
     ![](static/location-profile/02b.png)
 
