@@ -18,11 +18,11 @@ This add-on lab guide is intended to familiarize practitioners with the protecti
 
 ---
 
-    > [!IMPORTANT]
-    >
-    > We have pre-staged the lab with an install of Veeam Kasten, so there's no need to complete the steps in Section 2.
-    > Rather, this section just highlights how'd you go about installing Kasten if it were not already installed on
-    > the OpenShift cluster.
+> [!IMPORTANT]
+>
+> We have pre-staged the lab with an install of Veeam Kasten, so there's no need to complete the steps in Section 2.
+> Rather, this section just highlights how'd you go about installing Kasten if it were not already installed on
+> the OpenShift cluster.
 
 
 ## 2. Installing Kasten

@@ -30,8 +30,7 @@ Kasten supports the creation of immutable backups to ensure that, as a last line
 
    > [!CAUTION]
    >
-   > Kasten supports immutable object storage and it is recommended to protect backups against accidental deletion or ransomware attack.  For this lab, we won't
-   configure immutability as it 
+   > Kasten supports immutable object storage and it is recommended to protect backups against accidental deletion or ransomware attack.  For this lab, we won't configure immutability as this is just a temporary lab environment.
 
 1. Open an OpenShift command line terminal
 
@@ -89,7 +88,7 @@ Kasten supports the creation of immutable backups to ensure that, as a last line
 
 1. Click ***Next → Save Profile***.
 
-    You should expect your `ceph-rgw-immutable` Location Profile to appear with a ***Success*** status.
+    You should expect your `kastenbackups` Location Profile to appear with a ***Success*** status.
 
     ![](static/location-profile/05.png)
 
